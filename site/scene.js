@@ -1,4 +1,4 @@
-// Three.js 场景：构建轻量赛博朋克动态背景，并在失败时优雅降级。
+// Three.js 场景：增强版赛博朋克背景，支持星流与鼠标交互视差。
 const canvas = document.getElementById("bg-canvas");
 const statusNode = document.getElementById("render-status");
 
@@ -19,6 +19,10 @@ async function loadThreeModule() {
   }
 }
 
+function randomRange(min, max) {
+  return min + Math.random() * (max - min);
+}
+
 async function initScene() {
   if (!canvas) {
     return;
@@ -33,8 +37,8 @@ async function initScene() {
   try {
     const THREE = await loadThreeModule();
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 24);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 120);
+    camera.position.set(0, 0, 22);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -43,86 +47,144 @@ async function initScene() {
       powerPreference: "high-performance"
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+
+    const starsCount = window.innerWidth > 900 ? 2200 : 1200;
+    const starPositions = new Float32Array(starsCount * 3);
+    const starVelocity = new Float32Array(starsCount);
+    for (let i = 0, v = 0; i < starsCount * 3; i += 3, v += 1) {
+      starPositions[i] = randomRange(-45, 45);
+      starPositions[i + 1] = randomRange(-32, 32);
+      starPositions[i + 2] = randomRange(-70, 18);
+      starVelocity[v] = randomRange(0.08, 0.3);
+    }
 
     const starsGeometry = new THREE.BufferGeometry();
-    const starsCount = 1500;
-    const positions = new Float32Array(starsCount * 3);
-    for (let i = 0; i < starsCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 80;
-      positions[i + 1] = (Math.random() - 0.5) * 50;
-      positions[i + 2] = (Math.random() - 0.5) * 80;
-    }
-    starsGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    starsGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
     const starsMaterial = new THREE.PointsMaterial({
-      color: 0x43eeff,
-      size: 0.12,
+      color: 0x4cf2ff,
+      size: 0.13,
       transparent: true,
-      opacity: 0.9
+      opacity: 0.85
     });
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
-    const neonRing = new THREE.Mesh(
-      new THREE.TorusGeometry(7, 0.18, 18, 96),
+    const ringA = new THREE.Mesh(
+      new THREE.TorusGeometry(7, 0.19, 22, 120),
       new THREE.MeshBasicMaterial({
         color: 0xff4fd8,
         transparent: true,
-        opacity: 0.35
+        opacity: 0.36
       })
     );
-    neonRing.rotation.x = Math.PI * 0.38;
-    scene.add(neonRing);
+    ringA.rotation.x = Math.PI * 0.38;
+    scene.add(ringA);
+
+    const ringB = new THREE.Mesh(
+      new THREE.TorusGeometry(5.4, 0.12, 18, 100),
+      new THREE.MeshBasicMaterial({
+        color: 0x42e9ff,
+        transparent: true,
+        opacity: 0.34
+      })
+    );
+    ringB.rotation.x = Math.PI * 0.12;
+    ringB.rotation.y = Math.PI * 0.2;
+    scene.add(ringB);
 
     const wireCore = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(4, 1),
+      new THREE.IcosahedronGeometry(3.7, 1),
       new THREE.MeshBasicMaterial({
-        color: 0x9a4dff,
+        color: 0xa05bff,
         wireframe: true,
         transparent: true,
-        opacity: 0.42
+        opacity: 0.45
       })
     );
     scene.add(wireCore);
 
-    const floorGrid = new THREE.GridHelper(90, 48, 0x38f2ff, 0x203267);
-    floorGrid.position.y = -9;
-    floorGrid.position.z = -6;
+    const floorGrid = new THREE.GridHelper(120, 64, 0x2af2ff, 0x1f3060);
+    floorGrid.position.y = -10;
+    floorGrid.position.z = -8;
     floorGrid.rotation.x = Math.PI * 0.5;
     scene.add(floorGrid);
+
+    const pointer = { x: 0, y: 0 };
+    const pointerTarget = { x: 0, y: 0 };
+    const onPointerMove = (event) => {
+      pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointerTarget.y = (event.clientY / window.innerHeight) * 2 - 1;
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
     };
     window.addEventListener("resize", onResize);
 
     const clock = new THREE.Clock();
     let rafId = 0;
+    let pulseAt = 0;
 
     const animate = () => {
       const elapsed = clock.getElapsedTime();
-      stars.rotation.y = elapsed * 0.025;
-      stars.rotation.x = Math.sin(elapsed * 0.15) * 0.08;
-      wireCore.rotation.y = elapsed * 0.2;
-      wireCore.rotation.x = elapsed * 0.13;
-      neonRing.rotation.z = elapsed * 0.12;
-      floorGrid.position.z = -6 + Math.sin(elapsed * 0.4) * 0.6;
+      const positions = starsGeometry.attributes.position.array;
+
+      pointer.x += (pointerTarget.x - pointer.x) * 0.05;
+      pointer.y += (pointerTarget.y - pointer.y) * 0.05;
+      camera.position.x = pointer.x * 1.8;
+      camera.position.y = -pointer.y * 1.2;
+      camera.lookAt(0, 0, 0);
+
+      for (let i = 0, v = 0; i < positions.length; i += 3, v += 1) {
+        positions[i + 2] += starVelocity[v];
+        if (positions[i + 2] > 20) {
+          positions[i + 2] = randomRange(-72, -54);
+          positions[i] = randomRange(-45, 45);
+          positions[i + 1] = randomRange(-32, 32);
+        }
+      }
+      starsGeometry.attributes.position.needsUpdate = true;
+
+      wireCore.rotation.y = elapsed * 0.32;
+      wireCore.rotation.x = elapsed * 0.15;
+      ringA.rotation.z = elapsed * 0.15;
+      ringB.rotation.z = -elapsed * 0.19;
+      floorGrid.position.z = -8 + Math.sin(elapsed * 0.5) * 1.1;
+      stars.rotation.y = elapsed * 0.028;
+
+      if (elapsed - pulseAt > 3.4) {
+        pulseAt = elapsed;
+        ringA.scale.setScalar(randomRange(1.02, 1.1));
+        ringB.scale.setScalar(randomRange(0.95, 1.05));
+      } else {
+        ringA.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+        ringB.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+      }
 
       renderer.render(scene, camera);
       rafId = window.requestAnimationFrame(animate);
     };
 
     animate();
-    setStatus("Three.js 场景已启动 · AI x Frontend");
+    setStatus("Three.js Hyper Scene 在线 · Agent x Frontend");
 
     window.addEventListener("beforeunload", () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointerMove);
       starsGeometry.dispose();
       starsMaterial.dispose();
+      ringA.geometry.dispose();
+      ringB.geometry.dispose();
+      wireCore.geometry.dispose();
+      ringA.material.dispose();
+      ringB.material.dispose();
+      wireCore.material.dispose();
       renderer.dispose();
     });
   } catch (error) {

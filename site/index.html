@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alan | AI 智能体 & 前端工程师</title>
+    <title>Alan | Cyberpunk AI Agent Engineer</title>
     <meta
       name="description"
-      content="Alan 的赛博朋克风个人主页，突出 AI 智能体开发与前端全领域工程能力。"
+      content="Alan 的重赛博朋克个人主页，突出 AI 智能体开发与前端全领域工程能力。"
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -14,19 +14,26 @@
     <!-- Three.js 背景渲染挂载点 -->
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="scanline" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
     <header class="hero">
       <div class="hero__content">
-        <p class="tag">Neon Portfolio · GitHub Pages</p>
-        <h1>
-          你好，我是 <span class="accent">Alan</span><br />
-          AI 智能体与前端工程开发者
+        <p class="tag">Neon Ops Deck · GitHub Pages</p>
+        <h1 class="glitch" data-text="你好，我是 Alan">
+          你好，我是 <span class="accent">Alan</span>
         </h1>
+        <h2 class="hero-subtitle">AI 智能体开发 × 前端全栈工程</h2>
         <p class="subtitle">
-          聚焦多智能体系统、业务自动化 Agent、现代前端架构与性能优化，
-          持续将复杂需求转化为可扩展、可落地的高价值产品。
+          聚焦多智能体系统、业务自动化链路、前端架构与性能工程，
+          将复杂业务快速压缩为可持续迭代的产品战斗力。
         </p>
         <p class="signal" id="render-status">Three.js 场景加载中...</p>
+        <ul class="stats">
+          <li><strong>Agent</strong><span>Tool Use / RAG / Memory</span></li>
+          <li><strong>Frontend</strong><span>React / Vue / Next.js / Three.js</span></li>
+          <li><strong>Delivery</strong><span>Design to Code / CI-CD / Observability</span></li>
+        </ul>
         <div class="hero__actions">
           <a
             class="btn btn--primary"
@@ -42,6 +49,16 @@
     </header>
 
     <main class="container">
+      <section class="card terminal" id="ops">
+        <h2>实时能力流</h2>
+        <div class="terminal__content">
+          <p><span>$</span> init agent-workflow --mode multi-agent</p>
+          <p><span>$</span> attach tools --rag --browser --execution</p>
+          <p><span>$</span> optimize frontend --fps --lcp --dx</p>
+          <p><span>$</span> deploy production --stable --observable</p>
+        </div>
+      </section>
+
       <section class="card" id="about">
         <h2>关于我</h2>
         <p>
@@ -92,6 +109,9 @@
           <li>Tailwind CSS</li>
           <li>PostgreSQL</li>
           <li>Docker</li>
+          <li>CI/CD</li>
+          <li>Web Performance</li>
+          <li>Observability</li>
         </ul>
       </section>
 
@@ -135,6 +155,7 @@
     <footer class="footer">
       <p>© 2026 Alan · Cyberpunk AI Engineer</p>
     </footer>
+    <script src="./effects.js"></script>
     <script type="module" src="./scene.js"></script>
   </body>
 </html>

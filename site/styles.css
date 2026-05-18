@@ -51,6 +51,31 @@ body {
   );
 }
 
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: radial-gradient(rgb(255 255 255 / 75%) 0.7px, transparent 0.7px);
+  background-size: 3px 3px;
+  animation: noise-jitter 0.18s infinite;
+}
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgb(56 242 255 / 20%) 0, rgb(56 242 255 / 0%) 72%);
+  filter: blur(8px);
+}
+
 .hero {
   position: relative;
   z-index: 2;
@@ -68,6 +93,13 @@ body {
   backdrop-filter: blur(8px);
 }
 
+.hero__content.is-flicker {
+  box-shadow:
+    0 18px 40px rgb(0 0 0 / 45%),
+    0 0 22px rgb(56 242 255 / 30%);
+  filter: saturate(1.2) hue-rotate(-6deg);
+}
+
 .tag {
   display: inline-block;
   margin: 0 0 16px;
@@ -83,16 +115,51 @@ body {
 
 h1 {
   margin: 0;
-  font-size: clamp(40px, 5vw, 60px);
+  font-size: clamp(46px, 6vw, 70px);
   line-height: 1.1;
   text-shadow:
     0 0 15px rgb(154 77 255 / 35%),
     0 0 28px rgb(56 242 255 / 25%);
 }
 
+.glitch {
+  position: relative;
+  width: fit-content;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.glitch::before {
+  color: rgb(255 79 216 / 85%);
+  transform: translate(2px, -1px);
+  clip-path: polygon(0 8%, 100% 3%, 100% 35%, 0 42%);
+  animation: glitch-top 2.8s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  color: rgb(56 242 255 / 85%);
+  transform: translate(-2px, 1px);
+  clip-path: polygon(0 62%, 100% 56%, 100% 100%, 0 100%);
+  animation: glitch-bottom 2.2s infinite linear alternate-reverse;
+}
+
 .accent {
   color: var(--pink);
   text-shadow: 0 0 18px rgb(255 79 216 / 58%);
+}
+
+.hero-subtitle {
+  margin: 14px 0 0;
+  color: #bdefff;
+  font-size: clamp(20px, 2.6vw, 30px);
+  letter-spacing: 0.04em;
 }
 
 .subtitle {
@@ -106,6 +173,37 @@ h1 {
   margin-top: 14px;
   color: var(--cyan);
   font-size: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats li {
+  border: 1px solid rgb(56 242 255 / 35%);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgb(8 17 31 / 60%);
+}
+
+.stats strong {
+  display: block;
+  color: #f2f7ff;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stats span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .hero__actions {
@@ -161,6 +259,23 @@ h1 {
   background: var(--surface);
   box-shadow: var(--shadow);
   backdrop-filter: blur(9px);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid transparent;
+  background: linear-gradient(130deg, rgb(56 242 255 / 35%), rgb(154 77 255 / 22%)) border-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 
 h2 {
@@ -212,6 +327,30 @@ p {
   color: var(--muted);
 }
 
+.terminal__content {
+  border: 1px solid rgb(56 242 255 / 26%);
+  border-radius: 12px;
+  background: rgb(8 16 30 / 66%);
+  padding: 14px;
+  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.terminal__content p {
+  margin: 0;
+  color: #b7ecff;
+}
+
+.terminal__content p + p {
+  margin-top: 6px;
+}
+
+.terminal__content span {
+  color: #63ffe8;
+  margin-right: 8px;
+}
+
 a {
   color: var(--cyan);
 }
@@ -236,5 +375,57 @@ a {
 
   .project-grid {
     grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (pointer: coarse) {
+  .cursor-glow {
+    display: none;
+  }
+}
+
+@keyframes glitch-top {
+  0% {
+    transform: translate(2px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  100% {
+    transform: translate(3px, 0);
+  }
+}
+
+@keyframes glitch-bottom {
+  0% {
+    transform: translate(-2px, 1px);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+  100% {
+    transform: translate(-3px, 0);
+  }
+}
+
+@keyframes noise-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1px, 1px);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+  100% {
+    transform: translate(0, 0);
   }
 }

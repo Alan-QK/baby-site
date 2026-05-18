@@ -1,14 +1,15 @@
-/* 主页样式：保持简洁、清晰与响应式布局。 */
+/* 赛博朋克主页样式：霓虹、玻璃态与高对比层次。 */
 :root {
   color-scheme: dark;
-  --bg: #0b1020;
-  --surface: #141b34;
-  --text: #f3f7ff;
-  --muted: #b5c2dd;
-  --primary: #6ba5ff;
-  --primary-strong: #4b8dff;
-  --border: #2b365c;
-  --shadow: 0 16px 32px rgb(8 12 24 / 30%);
+  --bg: #06070f;
+  --surface: rgb(15 19 38 / 72%);
+  --text: #eaf3ff;
+  --muted: #9ab0cc;
+  --cyan: #38f2ff;
+  --purple: #9a4dff;
+  --pink: #ff4fd8;
+  --border: rgb(102 185 255 / 30%);
+  --shadow: 0 18px 40px rgb(0 0 0 / 45%);
 }
 
 * {
@@ -25,35 +26,73 @@ body {
     sans-serif;
   line-height: 1.6;
   color: var(--text);
-  background:
-    radial-gradient(circle at 20% 0, #1a2b57 0, transparent 50%),
-    radial-gradient(circle at 80% 20%, #17315f 0, transparent 55%),
-    var(--bg);
+  background-color: var(--bg);
+  overflow-x: hidden;
+}
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.scanline {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0%),
+    rgb(255 255 255 / 0%) 3px,
+    rgb(90 120 255 / 4%) 4px
+  );
 }
 
 .hero {
+  position: relative;
+  z-index: 2;
   padding: 84px 20px 56px;
 }
 
 .hero__content {
   max-width: 920px;
   margin: 0 auto;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(120deg, rgb(9 16 35 / 76%), rgb(18 13 33 / 66%));
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
 }
 
 .tag {
   display: inline-block;
   margin: 0 0 16px;
-  padding: 4px 12px;
-  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border: 1px solid rgb(56 242 255 / 44%);
   border-radius: 999px;
-  color: var(--muted);
+  color: var(--cyan);
   font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgb(56 242 255 / 40%);
 }
 
 h1 {
   margin: 0;
   font-size: clamp(40px, 5vw, 60px);
   line-height: 1.1;
+  text-shadow:
+    0 0 15px rgb(154 77 255 / 35%),
+    0 0 28px rgb(56 242 255 / 25%);
+}
+
+.accent {
+  color: var(--pink);
+  text-shadow: 0 0 18px rgb(255 79 216 / 58%);
 }
 
 .subtitle {
@@ -61,6 +100,12 @@ h1 {
   margin: 20px 0 0;
   color: var(--muted);
   font-size: clamp(16px, 2.2vw, 20px);
+}
+
+.signal {
+  margin-top: 14px;
+  color: var(--cyan);
+  font-size: 14px;
 }
 
 .hero__actions {
@@ -79,25 +124,30 @@ h1 {
   border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 0 18px rgb(56 242 255 / 28%);
 }
 
 .btn--primary {
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary) 0, var(--primary-strong) 100%);
+  color: #04161a;
+  background: linear-gradient(135deg, var(--cyan) 0, #78ffef 100%);
 }
 
 .btn--ghost {
   color: var(--text);
-  border: 1px solid var(--border);
-  background: rgb(255 255 255 / 4%);
+  border: 1px solid rgb(154 77 255 / 55%);
+  background: rgb(154 77 255 / 10%);
 }
 
 .container {
+  position: relative;
+  z-index: 2;
   max-width: 920px;
   margin: 0 auto;
   padding: 0 20px 64px;
@@ -108,14 +158,15 @@ h1 {
   padding: 28px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: rgb(12 19 39 / 75%);
+  background: var(--surface);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(9px);
 }
 
 h2 {
   margin: 0 0 14px;
   font-size: 24px;
+  color: #d4e8ff;
 }
 
 p {
@@ -133,10 +184,10 @@ p {
 
 .chips li {
   padding: 6px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgb(56 242 255 / 36%);
   border-radius: 999px;
-  color: var(--muted);
-  background: rgb(255 255 255 / 4%);
+  color: #bdeeff;
+  background: rgb(56 242 255 / 8%);
 }
 
 .project-grid {
@@ -147,13 +198,14 @@ p {
 
 .project {
   padding: 16px;
-  border: 1px solid var(--border);
+  border: 1px solid rgb(154 77 255 / 36%);
   border-radius: 12px;
-  background: rgb(255 255 255 / 3%);
+  background: rgb(154 77 255 / 8%);
 }
 
 .project h3 {
   margin: 0 0 8px;
+  color: #f1ddff;
 }
 
 .project p {
@@ -161,10 +213,12 @@ p {
 }
 
 a {
-  color: var(--primary);
+  color: var(--cyan);
 }
 
 .footer {
+  position: relative;
+  z-index: 2;
   padding: 26px 20px 40px;
   text-align: center;
   color: var(--muted);
@@ -172,6 +226,14 @@ a {
 }
 
 @media (max-width: 860px) {
+  .hero {
+    padding-top: 70px;
+  }
+
+  .hero__content {
+    padding: 22px;
+  }
+
   .project-grid {
     grid-template-columns: 1fr;
   }

@@ -3,21 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alan 的 GitHub 主页</title>
+    <title>Alan | AI 智能体 & 前端工程师</title>
     <meta
       name="description"
-      content="Alan 的个人主页，展示简介、技能、项目和联系方式。"
+      content="Alan 的赛博朋克风个人主页，突出 AI 智能体开发与前端全领域工程能力。"
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- Three.js 背景渲染挂载点 -->
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="scanline" aria-hidden="true"></div>
+
     <header class="hero">
       <div class="hero__content">
-        <p class="tag">GitHub Pages</p>
-        <h1>你好，我是 Alan</h1>
+        <p class="tag">Neon Portfolio · GitHub Pages</p>
+        <h1>
+          你好，我是 <span class="accent">Alan</span><br />
+          AI 智能体与前端工程开发者
+        </h1>
         <p class="subtitle">
-          全栈开发工程师，专注于高性能、可维护、体验友好的 Web 产品。
+          聚焦多智能体系统、业务自动化 Agent、现代前端架构与性能优化，
+          持续将复杂需求转化为可扩展、可落地的高价值产品。
         </p>
+        <p class="signal" id="render-status">Three.js 场景加载中...</p>
         <div class="hero__actions">
           <a
             class="btn btn--primary"
@@ -25,9 +34,9 @@
             target="_blank"
             rel="noreferrer"
           >
-            查看我的 GitHub
+            查看 GitHub
           </a>
-          <a class="btn btn--ghost" href="#projects">查看项目</a>
+          <a class="btn btn--ghost" href="#capabilities">查看能力矩阵</a>
         </div>
       </div>
     </header>
@@ -36,18 +45,50 @@
       <section class="card" id="about">
         <h2>关于我</h2>
         <p>
-          我热爱把复杂需求拆解成清晰、可执行、可扩展的技术方案。关注代码质量、
-          性能优化与用户体验，持续构建高价值的产品能力。
+          我擅长从 0 到 1 构建智能化产品能力，覆盖从 Agent 编排、工具调用链设计、
+          推理/执行闭环，到前端工程化、组件体系、体验优化与可观测性建设。
         </p>
       </section>
 
+      <section class="card" id="capabilities">
+        <h2>核心能力</h2>
+        <div class="project-grid">
+          <article class="project">
+            <h3>AI 智能体开发</h3>
+            <p>
+              构建单/多 Agent 工作流，设计 Tool Use、RAG、记忆机制与
+              自动化执行链路，提升任务完成率和稳定性。
+            </p>
+          </article>
+          <article class="project">
+            <h3>前端全领域工程</h3>
+            <p>
+              深耕 React / Next.js / TypeScript / 可视化 / 工程化，兼顾性能、
+              可维护性与一致性体验。
+            </p>
+          </article>
+          <article class="project">
+            <h3>全栈交付能力</h3>
+            <p>
+              打通 Node.js 服务、数据层与 CI/CD 发布链路，建立可持续迭代的产品技术底座。
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section class="card" id="skills">
-        <h2>技术栈</h2>
+        <h2>技术雷达</h2>
         <ul class="chips">
+          <li>AI Agents</li>
+          <li>LLM Workflow</li>
+          <li>RAG</li>
+          <li>Prompt Engineering</li>
           <li>TypeScript</li>
           <li>React</li>
+          <li>Vue</li>
           <li>Node.js</li>
           <li>Next.js</li>
+          <li>Three.js</li>
           <li>Tailwind CSS</li>
           <li>PostgreSQL</li>
           <li>Docker</li>
@@ -58,16 +99,23 @@
         <h2>精选项目</h2>
         <div class="project-grid">
           <article class="project">
-            <h3>项目 A</h3>
-            <p>高并发业务平台，优化关键页面性能并提升可维护性。</p>
+            <h3>AgentOps 控制台</h3>
+            <p>
+              为业务团队提供智能体运行态监控、任务回放与策略调优能力，
+              明显提升故障定位效率。
+            </p>
           </article>
           <article class="project">
-            <h3>项目 B</h3>
-            <p>企业级后台系统，重构组件架构并降低迭代成本。</p>
+            <h3>智能内容生成平台</h3>
+            <p>
+              基于大模型与模板编排实现批量内容生产，结合审核流与质量策略保障输出可靠性。
+            </p>
           </article>
           <article class="project">
-            <h3>项目 C</h3>
-            <p>自动化内容分发工具，缩短发布链路并增强稳定性。</p>
+            <h3>高性能前端中台</h3>
+            <p>
+              建立组件标准与性能预算体系，首屏速度、开发效率与线上稳定性同步提升。
+            </p>
           </article>
         </div>
       </section>
@@ -85,7 +133,8 @@
     </main>
 
     <footer class="footer">
-      <p>© 2026 Alan. Built with GitHub Pages.</p>
+      <p>© 2026 Alan · Cyberpunk AI Engineer</p>
     </footer>
+    <script type="module" src="./scene.js"></script>
   </body>
 </html>

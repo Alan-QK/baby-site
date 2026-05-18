@@ -112,11 +112,21 @@ async function initScene() {
 
     const pointer = { x: 0, y: 0 };
     const pointerTarget = { x: 0, y: 0 };
+    const stage = { scrollProgress: 0, beatEnergy: 0 };
+    const restScale = new THREE.Vector3(1, 1, 1);
     const onPointerMove = (event) => {
       pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
       pointerTarget.y = (event.clientY / window.innerHeight) * 2 - 1;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    const onScrollProgress = (event) => {
+      if (!event?.detail) {
+        return;
+      }
+      stage.scrollProgress = Math.min(Math.max(event.detail.progress || 0, 0), 1);
+    };
+    window.addEventListener("cyber-scroll", onScrollProgress);
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -133,15 +143,20 @@ async function initScene() {
     const animate = () => {
       const elapsed = clock.getElapsedTime();
       const positions = starsGeometry.attributes.position.array;
+      stage.beatEnergy = Math.min(Math.max(Number(window.__cyberBeatEnergy || 0), 0), 1);
+
+      const speedBoost = 1 + stage.scrollProgress * 2 + stage.beatEnergy * 2.6;
+      const cameraTargetZ = 22 - stage.scrollProgress * 4.8 + stage.beatEnergy * 0.8;
 
       pointer.x += (pointerTarget.x - pointer.x) * 0.05;
       pointer.y += (pointerTarget.y - pointer.y) * 0.05;
       camera.position.x = pointer.x * 1.8;
       camera.position.y = -pointer.y * 1.2;
+      camera.position.z += (cameraTargetZ - camera.position.z) * 0.05;
       camera.lookAt(0, 0, 0);
 
       for (let i = 0, v = 0; i < positions.length; i += 3, v += 1) {
-        positions[i + 2] += starVelocity[v];
+        positions[i + 2] += starVelocity[v] * speedBoost;
         if (positions[i + 2] > 20) {
           positions[i + 2] = randomRange(-72, -54);
           positions[i] = randomRange(-45, 45);
@@ -150,20 +165,23 @@ async function initScene() {
       }
       starsGeometry.attributes.position.needsUpdate = true;
 
-      wireCore.rotation.y = elapsed * 0.32;
-      wireCore.rotation.x = elapsed * 0.15;
-      ringA.rotation.z = elapsed * 0.15;
-      ringB.rotation.z = -elapsed * 0.19;
-      floorGrid.position.z = -8 + Math.sin(elapsed * 0.5) * 1.1;
+      wireCore.rotation.y = elapsed * (0.32 + stage.beatEnergy * 0.2);
+      wireCore.rotation.x = elapsed * (0.15 + stage.scrollProgress * 0.07);
+      ringA.rotation.z = elapsed * (0.15 + stage.scrollProgress * 0.2);
+      ringB.rotation.z = -elapsed * (0.19 + stage.beatEnergy * 0.25);
+      floorGrid.position.z = -8 + Math.sin(elapsed * 0.5 + stage.scrollProgress * 2) * (1.1 + stage.beatEnergy);
       stars.rotation.y = elapsed * 0.028;
+      ringA.material.opacity = 0.28 + stage.beatEnergy * 0.55;
+      ringB.material.opacity = 0.24 + stage.beatEnergy * 0.48;
+      wireCore.material.opacity = 0.4 + stage.beatEnergy * 0.25;
 
       if (elapsed - pulseAt > 3.4) {
         pulseAt = elapsed;
         ringA.scale.setScalar(randomRange(1.02, 1.1));
         ringB.scale.setScalar(randomRange(0.95, 1.05));
       } else {
-        ringA.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
-        ringB.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+        ringA.scale.lerp(restScale, 0.05);
+        ringB.scale.lerp(restScale, 0.05);
       }
 
       renderer.render(scene, camera);
@@ -177,6 +195,7 @@ async function initScene() {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("cyber-scroll", onScrollProgress);
       starsGeometry.dispose();
       starsMaterial.dispose();
       ringA.geometry.dispose();

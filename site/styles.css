@@ -10,6 +10,8 @@
   --pink: #ff4fd8;
   --border: rgb(102 185 255 / 30%);
   --shadow: 0 18px 40px rgb(0 0 0 / 45%);
+  --beat-energy: 0;
+  --scroll-progress: 0;
 }
 
 * {
@@ -49,6 +51,7 @@ body {
     rgb(255 255 255 / 0%) 3px,
     rgb(90 120 255 / 4%) 4px
   );
+  opacity: calc(0.65 + (var(--beat-energy) * 0.3));
 }
 
 .noise {
@@ -74,12 +77,14 @@ body {
   transform: translate(-50%, -50%);
   background: radial-gradient(circle, rgb(56 242 255 / 20%) 0, rgb(56 242 255 / 0%) 72%);
   filter: blur(8px);
+  opacity: calc(0.7 + (var(--beat-energy) * 0.28));
 }
 
 .hero {
   position: relative;
   z-index: 2;
   padding: 84px 20px 56px;
+  transform: translateY(calc(var(--scroll-progress) * -18px));
 }
 
 .hero__content {
@@ -91,6 +96,11 @@ body {
   background: linear-gradient(120deg, rgb(9 16 35 / 76%), rgb(18 13 33 / 66%));
   box-shadow: var(--shadow);
   backdrop-filter: blur(8px);
+  transition:
+    box-shadow 0.25s ease,
+    filter 0.25s ease,
+    transform 0.45s ease;
+  transform: perspective(900px) rotateX(calc(var(--scroll-progress) * 2deg));
 }
 
 .hero__content.is-flicker {
@@ -98,6 +108,12 @@ body {
     0 18px 40px rgb(0 0 0 / 45%),
     0 0 22px rgb(56 242 255 / 30%);
   filter: saturate(1.2) hue-rotate(-6deg);
+}
+
+body.audio-live .hero__content {
+  box-shadow:
+    0 18px 40px rgb(0 0 0 / 45%),
+    0 0 calc(10px + (var(--beat-energy) * 36px)) rgb(56 242 255 / 30%);
 }
 
 .tag {
@@ -175,6 +191,12 @@ h1 {
   font-size: 14px;
 }
 
+.audio-status {
+  margin-top: 8px;
+  color: #f0b4ff;
+  font-size: 13px;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -243,6 +265,20 @@ h1 {
   background: rgb(154 77 255 / 10%);
 }
 
+.btn--audio {
+  color: #170019;
+  border: 1px solid rgb(255 79 216 / 70%);
+  background: linear-gradient(135deg, #ff89e8 0, #ff4fd8 100%);
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn--audio.is-active {
+  color: #041620;
+  background: linear-gradient(135deg, #84faff 0, #37f1ff 100%);
+  border-color: rgb(56 242 255 / 70%);
+}
+
 .container {
   position: relative;
   z-index: 2;
@@ -261,6 +297,11 @@ h1 {
   backdrop-filter: blur(9px);
   position: relative;
   overflow: hidden;
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease,
+    filter 0.55s ease,
+    box-shadow 0.3s ease;
 }
 
 .card::before {
@@ -276,6 +317,22 @@ h1 {
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+}
+
+.js-enhanced .card {
+  opacity: 0;
+  transform: translateY(34px) scale(0.985);
+  filter: blur(6px);
+}
+
+.js-enhanced .card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.card.is-glitch-in {
+  animation: card-glitch 0.28s ease;
 }
 
 h2 {
@@ -327,6 +384,10 @@ p {
   color: var(--muted);
 }
 
+body.audio-live .project {
+  box-shadow: 0 0 calc(8px + (var(--beat-energy) * 22px)) rgb(255 79 216 / 16%);
+}
+
 .terminal__content {
   border: 1px solid rgb(56 242 255 / 26%);
   border-radius: 12px;
@@ -362,6 +423,12 @@ a {
   text-align: center;
   color: var(--muted);
   font-size: 14px;
+}
+
+body.audio-live .tag {
+  text-shadow:
+    0 0 10px rgb(56 242 255 / 45%),
+    0 0 calc(6px + (var(--beat-energy) * 22px)) rgb(255 79 216 / 35%);
 }
 
 @media (max-width: 860px) {
@@ -427,5 +494,24 @@ a {
   }
   100% {
     transform: translate(0, 0);
+  }
+}
+
+@keyframes card-glitch {
+  0% {
+    transform: translateY(0) translateX(0);
+    filter: brightness(1.1);
+  }
+  30% {
+    transform: translateY(0) translateX(-3px);
+    filter: hue-rotate(-15deg) brightness(1.2);
+  }
+  65% {
+    transform: translateY(0) translateX(3px);
+    filter: hue-rotate(15deg) brightness(1.15);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+    filter: brightness(1);
   }
 }

@@ -23,6 +23,10 @@ function randomRange(min, max) {
   return min + Math.random() * (max - min);
 }
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 async function initScene() {
   if (!canvas) {
     return;
@@ -113,12 +117,51 @@ async function initScene() {
     const pointer = { x: 0, y: 0 };
     const pointerTarget = { x: 0, y: 0 };
     const stage = { scrollProgress: 0, beatEnergy: 0 };
+    const drag = {
+      active: false,
+      lastX: 0,
+      lastY: 0,
+      targetX: 0,
+      targetY: 0,
+      offsetX: 0,
+      offsetY: 0
+    };
     const restScale = new THREE.Vector3(1, 1, 1);
     const onPointerMove = (event) => {
       pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
       pointerTarget.y = (event.clientY / window.innerHeight) * 2 - 1;
+      if (!drag.active) {
+        return;
+      }
+      const deltaX = event.clientX - drag.lastX;
+      const deltaY = event.clientY - drag.lastY;
+      drag.lastX = event.clientX;
+      drag.lastY = event.clientY;
+      drag.targetX = clamp(drag.targetX + deltaX * 0.018, -4.8, 4.8);
+      drag.targetY = clamp(drag.targetY + deltaY * 0.015, -3.2, 3.2);
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    const onDragStart = (event) => {
+      drag.active = true;
+      drag.lastX = event.clientX;
+      drag.lastY = event.clientY;
+      canvas.classList.add("is-dragging");
+      if (canvas.setPointerCapture && typeof event.pointerId === "number") {
+        canvas.setPointerCapture(event.pointerId);
+      }
+    };
+
+    const onDragEnd = (event) => {
+      drag.active = false;
+      canvas.classList.remove("is-dragging");
+      if (canvas.releasePointerCapture && typeof event.pointerId === "number") {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+    };
+    canvas.addEventListener("pointerdown", onDragStart);
+    canvas.addEventListener("pointerup", onDragEnd);
+    canvas.addEventListener("pointerleave", onDragEnd);
 
     const onScrollProgress = (event) => {
       if (!event?.detail) {
@@ -150,8 +193,15 @@ async function initScene() {
 
       pointer.x += (pointerTarget.x - pointer.x) * 0.05;
       pointer.y += (pointerTarget.y - pointer.y) * 0.05;
-      camera.position.x = pointer.x * 1.8;
-      camera.position.y = -pointer.y * 1.2;
+      if (!drag.active) {
+        drag.targetX *= 0.97;
+        drag.targetY *= 0.97;
+      }
+      drag.offsetX += (drag.targetX - drag.offsetX) * 0.07;
+      drag.offsetY += (drag.targetY - drag.offsetY) * 0.07;
+
+      camera.position.x = pointer.x * 1.8 + drag.offsetX;
+      camera.position.y = -pointer.y * 1.2 - drag.offsetY;
       camera.position.z += (cameraTargetZ - camera.position.z) * 0.05;
       camera.lookAt(0, 0, 0);
 
@@ -167,8 +217,8 @@ async function initScene() {
 
       wireCore.rotation.y = elapsed * (0.32 + stage.beatEnergy * 0.2);
       wireCore.rotation.x = elapsed * (0.15 + stage.scrollProgress * 0.07);
-      ringA.rotation.z = elapsed * (0.15 + stage.scrollProgress * 0.2);
-      ringB.rotation.z = -elapsed * (0.19 + stage.beatEnergy * 0.25);
+      ringA.rotation.z = elapsed * (0.15 + stage.scrollProgress * 0.2) + drag.offsetX * 0.03;
+      ringB.rotation.z = -elapsed * (0.19 + stage.beatEnergy * 0.25) - drag.offsetY * 0.04;
       floorGrid.position.z = -8 + Math.sin(elapsed * 0.5 + stage.scrollProgress * 2) * (1.1 + stage.beatEnergy);
       stars.rotation.y = elapsed * 0.028;
       ringA.material.opacity = 0.28 + stage.beatEnergy * 0.55;
@@ -189,13 +239,16 @@ async function initScene() {
     };
 
     animate();
-    setStatus("Three.js Hyper Scene 在线 · Agent x Frontend");
+    setStatus("Three.js Hyper Scene 在线 · 可拖拽背景调视角");
 
     window.addEventListener("beforeunload", () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("cyber-scroll", onScrollProgress);
+      canvas.removeEventListener("pointerdown", onDragStart);
+      canvas.removeEventListener("pointerup", onDragEnd);
+      canvas.removeEventListener("pointerleave", onDragEnd);
       starsGeometry.dispose();
       starsMaterial.dispose();
       ringA.geometry.dispose();

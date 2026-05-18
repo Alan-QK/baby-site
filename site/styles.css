@@ -38,6 +38,11 @@ body {
   width: 100%;
   height: 100%;
   z-index: 0;
+  cursor: grab;
+}
+
+#bg-canvas.is-dragging {
+  cursor: grabbing;
 }
 
 .scanline {
@@ -352,14 +357,65 @@ p {
   list-style: none;
   padding: 0;
   margin: 0;
+  perspective: 1000px;
 }
 
 .chips li {
-  padding: 6px 12px;
+  --chip-tilt-x: 0deg;
+  --chip-tilt-y: 0deg;
+  min-width: 124px;
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  padding: 0;
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--chip-tilt-x)) rotateY(var(--chip-tilt-y));
+  transition: transform 0.22s ease;
+  cursor: pointer;
+  outline: none;
+}
+
+.chip-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.52s cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.chips li:hover .chip-flip,
+.chips li:focus-visible .chip-flip,
+.chips li.is-flipped .chip-flip {
+  transform: rotateY(180deg);
+}
+
+.chip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
   border: 1px solid rgb(56 242 255 / 36%);
-  border-radius: 999px;
+  backface-visibility: hidden;
+  padding: 0 8px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.chip-face--front {
   color: #bdeeff;
   background: rgb(56 242 255 / 8%);
+}
+
+.chip-face--back {
+  color: #ffd9f7;
+  background: rgb(255 79 216 / 14%);
+  border-color: rgb(255 79 216 / 42%);
+  transform: rotateY(180deg);
+  font-size: 12px;
 }
 
 .project-grid {
@@ -373,6 +429,35 @@ p {
   border: 1px solid rgb(154 77 255 / 36%);
   border-radius: 12px;
   background: rgb(154 77 255 / 8%);
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+#projects .project:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  border-color: rgb(56 242 255 / 52%);
+  box-shadow: 0 10px 28px rgb(56 242 255 / 13%);
+}
+
+#projects .project::after {
+  content: "";
+  position: absolute;
+  inset: -40% -18%;
+  background:
+    linear-gradient(110deg, rgb(56 242 255 / 0%) 38%, rgb(56 242 255 / 40%) 50%, rgb(56 242 255 / 0%) 62%),
+    linear-gradient(115deg, rgb(255 79 216 / 0%) 43%, rgb(255 79 216 / 22%) 52%, rgb(255 79 216 / 0%) 61%);
+  transform: translateY(-120%) rotate(-8deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#projects .project.is-scan::after {
+  animation: holo-scan 0.95s cubic-bezier(0.2, 0.75, 0.2, 1);
 }
 
 .project h3 {
@@ -513,5 +598,19 @@ body.audio-live .tag {
   100% {
     transform: translateY(0) translateX(0);
     filter: brightness(1);
+  }
+}
+
+@keyframes holo-scan {
+  0% {
+    transform: translateY(-120%) rotate(-8deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.88;
+  }
+  100% {
+    transform: translateY(120%) rotate(-8deg);
+    opacity: 0;
   }
 }

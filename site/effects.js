@@ -48,6 +48,105 @@
   );
   cards.forEach((card) => observer.observe(card));
 
+  const chipBackText = {
+    "AI Agents": "Agent 架构",
+    "LLM Workflow": "链路编排",
+    RAG: "检索增强",
+    "Prompt Engineering": "提示优化",
+    TypeScript: "类型安全",
+    React: "组件驱动",
+    Vue: "响应式体验",
+    "Node.js": "服务能力",
+    "Next.js": "全栈渲染",
+    "Three.js": "3D 可视化",
+    "Tailwind CSS": "原子样式",
+    PostgreSQL: "数据模型",
+    Docker: "容器交付",
+    "CI/CD": "自动发布",
+    "Web Performance": "性能预算",
+    Observability: "监控追踪"
+  };
+
+  const chips = Array.from(document.querySelectorAll("#skills .chips li"));
+  chips.forEach((chip) => {
+    const label = chip.textContent ? chip.textContent.trim() : "";
+    const detail = chipBackText[label] || "工程能力";
+
+    const flip = document.createElement("span");
+    flip.className = "chip-flip";
+    const front = document.createElement("span");
+    front.className = "chip-face chip-face--front";
+    front.textContent = label;
+    const back = document.createElement("span");
+    back.className = "chip-face chip-face--back";
+    back.textContent = detail;
+
+    flip.append(front, back);
+    chip.textContent = "";
+    chip.append(flip);
+    chip.tabIndex = 0;
+    chip.setAttribute("role", "button");
+    chip.setAttribute("aria-label", `${label}：${detail}`);
+
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("is-flipped");
+    });
+    chip.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        chip.classList.toggle("is-flipped");
+      }
+    });
+    chip.addEventListener("pointermove", (event) => {
+      const rect = chip.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+      chip.style.setProperty("--chip-tilt-x", `${(-y * 10).toFixed(2)}deg`);
+      chip.style.setProperty("--chip-tilt-y", `${(x * 14).toFixed(2)}deg`);
+    });
+    chip.addEventListener("pointerleave", () => {
+      chip.style.setProperty("--chip-tilt-x", "0deg");
+      chip.style.setProperty("--chip-tilt-y", "0deg");
+    });
+  });
+
+  const projectCards = Array.from(document.querySelectorAll("#projects .project"));
+  const triggerProjectScan = () => {
+    projectCards.forEach((card, index) => {
+      window.setTimeout(() => {
+        card.classList.remove("is-scan");
+        // 触发重排，确保动画可重复执行。
+        void card.offsetWidth;
+        card.classList.add("is-scan");
+      }, index * 130);
+    });
+  };
+
+  if (projectCards.length > 0) {
+    const projectsSection = document.getElementById("projects");
+    if (projectsSection) {
+      const scanObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              triggerProjectScan();
+              scanObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      scanObserver.observe(projectsSection);
+    }
+    projectCards.forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        card.classList.remove("is-scan");
+        void card.offsetWidth;
+        card.classList.add("is-scan");
+      });
+    });
+  }
+
   const updateScrollProgress = () => {
     const scrollTop = window.scrollY;
     const maxScrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
